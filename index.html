@@ -173,12 +173,15 @@ textarea { width: 100%; min-height: 120px; box-sizing: border-box; border-radius
     let body = JSON.stringify({ kind, page: pageId, run: runNo, at: new Date().toISOString(), ua: navigator.userAgent, ...data });
     if (new Blob([body]).size > 3900 && data.results) body = JSON.stringify({ kind, page: pageId, run: runNo, at: new Date().toISOString(), ...data, results: { ...data.results, recommendations: undefined } });
     for (let i = 0; i < 3; i++) {
-      try { const r = await fetch(REPORT_URL, { method: 'POST', body }); if (r.ok) return true; } catch (e) { /* retry below */ }
+      const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 10000);
+      try { const r = await fetch(REPORT_URL, { method: 'POST', body, signal: ctl.signal }); if (r.ok) return true; } catch (e) { /* retry below */ }
+      finally { clearTimeout(timer); }
       await wait(2000);
     }
     return false;
   }
   report('open', { device: results.device });
+  window.addEventListener('error', (e) => { report('error', { message: String(e.message), where: e.filename + ':' + e.lineno, stage: $('stageLabel').textContent }); });
 
   // ---------- scenes (the launcher's own effects) ----------
   const css = (el, s) => { el.setAttribute('style', s); return el; };
@@ -248,6 +251,7 @@ textarea { width: 100%; min-height: 120px; box-sizing: border-box; border-radius
 
   async function runAll() {
     $('run').disabled = true; $('copy').disabled = true; rows.textContent = ''; results.tests = [];
+    report('start', {});
     const total = SCENES.length + 1; let done = 0; const step = () => { done++; $('bar').style.width = Math.round(done / total * 100) + '%'; };
     // nominal refresh from the idle scene
     clear(); $('stageLabel').textContent = SCENES[0].name;
@@ -290,7 +294,9 @@ textarea { width: 100%; min-height: 120px; box-sizing: border-box; border-radius
     results.recommendations = recs;
   }
 
-  $('run').addEventListener('click', () => { runAll().catch((e) => { $('stageLabel').textContent = 'Ошибка: ' + e.message; $('run').disabled = false; }); });
+  $('run').addEventListener('click', () => { runAll().catch((e) => {
+    report('error', { message: String(e && e.message), stack: String(e && e.stack).slice(0, 1500), stage: $('stageLabel').textContent, partial: results.tests });
+    $('stageLabel').textContent = 'Ошибка: ' + e.message; $('run').disabled = false; }); });
   $('copy').addEventListener('click', async () => {
     const text = JSON.stringify(results, null, 1);
     try { await navigator.clipboard.writeText(text); $('copy').textContent = 'Скопировано'; }
