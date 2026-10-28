@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тест магнитолы для лаунчера</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --screen: #E6E8EC; --card: #FFFFFF; --raised: #E8EBEF; --line: #CDD1D7; --text: #0B0D10; --muted: #3B4047;
+  --accent: #0F489D; --on-accent: #EEF0F3; --accent-text: #0B4699; --ok: #00594A; --warn: #6B3D00; --crit: #9A1C10;
+  --tint-ok: rgba(0, 120, 100, 0.10); --tint-warn: rgba(180, 110, 0, 0.12); --tint-crit: rgba(190, 40, 20, 0.10);
+  color-scheme: light;
+  box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --screen: #131418; --card: #1B1D21; --raised: #23262B; --line: #2B2E34; --text: #E4E7EB; --muted: #8F959E;
+    --accent: #0F489D; --on-accent: #EEF0F3; --accent-text: #96BBF2; --ok: #8FD6CA; --warn: #EBC07A; --crit: #EE9C8A;
+    --tint-ok: rgba(127, 207, 195, 0.12); --tint-warn: rgba(230, 181, 102, 0.14); --tint-crit: rgba(232, 144, 125, 0.14);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --screen: #131418; --card: #1B1D21; --raised: #23262B; --line: #2B2E34; --text: #E4E7EB; --muted: #8F959E;
+  --accent: #0F489D; --on-accent: #EEF0F3; --accent-text: #96BBF2; --ok: #8FD6CA; --warn: #EBC07A; --crit: #EE9C8A;
+  --tint-ok: rgba(127, 207, 195, 0.12); --tint-warn: rgba(230, 181, 102, 0.14); --tint-crit: rgba(232, 144, 125, 0.14);
+  color-scheme: dark;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body { margin: 0; background: var(--screen); color: var(--text); font-family: 'Google Sans', 'Roboto', system-ui, sans-serif; font-size: 17px; line-height: 1.35; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 20px 24px 40px; display: flex; flex-direction: column; gap: 16px; }
+.top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+h1 { margin: 0; font-size: 28px; line-height: 1.3; flex-grow: 1; }
+h2 { margin: 0; font-size: 20px; line-height: 1.3; font-weight: 600; }
+.lead { margin: 0; color: var(--muted); font-size: 16px; max-width: 70ch; }
+.btn { height: 64px; padding: 0 28px; border: none; border-radius: 18px; background: var(--accent); color: var(--on-accent); font: 600 19px/1 inherit; font-family: inherit; cursor: pointer; }
+.btn.secondary { background: var(--raised); color: var(--text); }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 20px; }
+.fact { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fact b { font-size: 18px; font-weight: 600; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.fact span { font-size: 15px; color: var(--muted); }
+.table { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); font-size: 16px; vertical-align: top; }
+th { color: var(--muted); font-weight: 500; font-size: 15px; }
+td.num { white-space: nowrap; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 15px; font-size: 15px; font-weight: 600; white-space: nowrap; }
+.chip.ok { background: var(--tint-ok); color: var(--ok); } .chip.warn { background: var(--tint-warn); color: var(--warn); } .chip.crit { background: var(--tint-crit); color: var(--crit); }
+.chip.wait { background: var(--raised); color: var(--muted); }
+.stage { position: relative; height: 300px; border-radius: 24px; overflow: hidden; background: var(--screen); border: 1px solid var(--line); }
+.stage-label { position: absolute; left: 16px; top: 12px; z-index: 5; font-size: 15px; color: var(--muted); background: var(--card); padding: 4px 10px; border-radius: 12px; }
+.recs { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.progress { height: 6px; border-radius: 3px; background: var(--raised); overflow: hidden; }
+.progress > div { height: 100%; width: 0%; background: var(--accent-text); transition: width 200ms ease; }
+textarea { width: 100%; min-height: 120px; box-sizing: border-box; border-radius: 14px; border: 1px solid var(--line); background: var(--raised); color: var(--text); font: 14px/1.4 ui-monospace, monospace; padding: 10px; }
+.muted { color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .progress > div { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>Тест магнитолы для лаунчера</h1>
+    <button class="btn" id="run" type="button">Запустить тесты</button>
+    <button class="btn secondary" id="copy" type="button" disabled>Скопировать результаты</button>
+  </div>
+  <p class="lead">Гоняет те же эффекты, что в макетах лаунчера, и меряет плавность прямо на этом экране. Занимает около минуты. Не трогайте экран во время теста. Для честного результата запустите дважды: один раз как есть, второй раз с работающим CarPlay в ZLink.</p>
+
+  <section class="card" aria-labelledby="dev-h">
+    <h2 id="dev-h">Устройство</h2>
+    <div class="facts" id="facts"></div>
+  </section>
+
+  <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+  <section class="stage" id="stage" aria-label="Площадка теста"><span class="stage-label" id="stageLabel">Здесь будут идти тесты</span></section>
+
+  <section class="card" aria-labelledby="res-h">
+    <h2 id="res-h">Результаты</h2>
+    <div class="table"><table>
+      <thead><tr><th>Тест</th><th>Кадров/с</th><th>Медленные кадры</th><th>Итог</th><th>Что это значит</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+  </section>
+
+  <section class="card" aria-labelledby="rec-h">
+    <h2 id="rec-h">Что это значит для лаунчера</h2>
+    <ul class="recs" id="recs"><li class="muted">Появится после теста.</li></ul>
+    <textarea id="dump" readonly aria-label="Результаты в виде текста" hidden></textarea>
+  </section>
+  <p class="muted" style="font-size: 15px; margin: 0">Браузер рисует иначе, чем нативный лаунчер, поэтому это оценка сверху: если здесь тормозит, в лаунчере эффект тоже стоит упростить. Нативную плавность меряет скрипт launcher-bench.sh.</p>
+</div>
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const stage = $('stage'), rows = $('rows');
+  const results = { device: {}, tests: [], cpu: {} };
+
+  // ---------- device facts ----------
+  function gpu() {
+    try {
+      const c = document.createElement('canvas');
+      const gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+      if (!gl) return 'нет WebGL';
+      const ext = gl.getExtension('WEBGL_debug_renderer_info');
+      return ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+    } catch (e) { return 'неизвестно'; }
+  }
+  function android() {
+    const m = navigator.userAgent.match(/Android\s([\d.]+)/);
+    return m ? 'Android ' + m[1] : 'не Android';
+  }
+  function browser() {
+    const m = navigator.userAgent.match(/(Chrome|Firefox)\/([\d.]+)/);
+    const wv = /; wv\)/.test(navigator.userAgent) ? ' (WebView)' : '';
+    return m ? m[1] + ' ' + m[2].split('.')[0] + wv : 'неизвестно';
+  }
+  function fact(label, value) {
+    const d = document.createElement('div'); d.className = 'fact';
+    const b = document.createElement('b'); b.textContent = value;
+    const s = document.createElement('span'); s.textContent = label;
+    d.append(b, s); $('facts').append(d);
+  }
+  const dpr = window.devicePixelRatio || 1;
+  results.device = {
+    screenCss: screen.width + '×' + screen.height,
+    screenPx: Math.round(screen.width * dpr) + '×' + Math.round(screen.height * dpr),
+    dpr: dpr, densityDpi: Math.round(160 * dpr),
+    cores: navigator.hardwareConcurrency || null,
+    memoryGb: navigator.deviceMemory || null,
+    gpu: gpu(), android: android(), browser: browser(),
+    touch: navigator.maxTouchPoints || 0
+  };
+  fact('экран в пикселях', results.device.screenPx);
+  fact('плотность (примерно)', results.device.densityDpi + ' dpi, масштаб ' + dpr);
+  fact('потоков процессора', results.device.cores || 'не сообщает');
+  fact('память (грубо, браузер ограничивает 8)', results.device.memoryGb ? results.device.memoryGb + ' ГБ' : 'не сообщает');
+  fact('графический процессор', results.device.gpu);
+  fact('система и браузер', results.device.android + ', ' + results.device.browser);
+
+  // ---------- frame measurement ----------
+  function measure(ms) {
+    return new Promise((resolve) => {
+      const t = []; let start = null;
+      function f(ts) {
+        if (start === null) start = ts;
+        t.push(ts);
+        if (ts - start < ms) requestAnimationFrame(f); else resolve(t);
+      }
+      requestAnimationFrame(f);
+    });
+  }
+  function stats(t, nominal) {
+    const d = []; for (let i = 1; i < t.length; i++) d.push(t[i] - t[i - 1]);
+    const total = (t[t.length - 1] - t[0]) / 1000;
+    const sorted = d.slice().sort((a, b) => a - b);
+    const p95 = sorted[Math.floor(sorted.length * 0.95)] || 0;
+    const slow = d.filter((x) => x > nominal * 1.5).length;
+    return { fps: Math.round(d.length / total), p95: Math.round(p95 * 10) / 10, slowPct: Math.round(slow / Math.max(1, d.length) * 100) };
+  }
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // ---------- scenes (the launcher's own effects) ----------
+  const css = (el, s) => { el.setAttribute('style', s); return el; };
+  const anims = [];
+  function clear() { anims.forEach((a) => a.cancel()); anims.length = 0; [...stage.querySelectorAll('.scene')].forEach((n) => n.remove()); }
+  function scene() { const s = css(document.createElement('div'), 'position:absolute;inset:0;display:flex;flex-wrap:wrap;gap:16px;padding:48px 16px 16px;box-sizing:border-box'); s.className = 'scene'; stage.append(s); return s; }
+  function cardEl(parent, w) { return css(document.createElement('div'), `width:${w}px;height:110px;border-radius:24px;background:var(--card);border:1px solid var(--line);position:relative;overflow:hidden;flex-shrink:0`); }
+  const loop = (d) => ({ duration: d, iterations: Infinity, easing: 'ease-in-out' });
+  const SCENES = [
+    { id: 'idle', name: 'Пустой экран', meaning: 'частота экрана без нагрузки', build() {} },
+    { id: 'breathe', name: 'Дыхание и пульс (12 точек и значков)', meaning: 'живые статусы на виджетах', build(s) {
+      for (let i = 0; i < 12; i++) { const c = cardEl(s, 180); s.append(c); const dot = css(document.createElement('div'), 'position:absolute;left:20px;top:20px;width:14px;height:14px;border-radius:7px;background:var(--ok)'); c.append(dot);
+        anims.push(dot.animate([{ opacity: 1 }, { opacity: 0.4 }, { opacity: 1 }], loop(i % 2 ? 2400 : 3200))); } } },
+    { id: 'sweep', name: 'Бегущий свет со свечением (3 шкалы)', meaning: 'зарядка EcoFlow, задачи Hermes', build(s) {
+      for (let i = 0; i < 3; i++) { const c = cardEl(s, 380); s.append(c);
+        const bar = css(document.createElement('div'), 'position:absolute;left:20px;right:20px;top:50px;height:10px;border-radius:5px;background:var(--raised)'); c.append(bar);
+        const fill = css(document.createElement('div'), 'position:absolute;left:0;top:0;bottom:0;width:76%;border-radius:5px;background:var(--ok);opacity:.8'); bar.append(fill);
+        const halo = css(document.createElement('div'), 'position:absolute;top:50%;left:0;width:100px;height:26px;margin-top:-13px;border-radius:13px;filter:blur(5px);background:radial-gradient(ellipse at center,rgba(255,255,255,.55),rgba(255,255,255,0) 70%)'); fill.append(halo);
+        anims.push(halo.animate([{ left: '0px', opacity: 0 }, { opacity: 1, offset: 0.4 }, { left: 'calc(100% - 100px)', opacity: 0, offset: 0.82 }, { left: 'calc(100% - 100px)', opacity: 0 }], { duration: 3400, iterations: Infinity })); } } },
+    { id: 'rings', name: 'Кольца внимания (4 блока)', meaning: '«ждёт вас», тревога на карточке', build(s) {
+      for (let i = 0; i < 4; i++) { const c = cardEl(s, 260); s.append(c);
+        anims.push(c.animate([{ boxShadow: '0 0 0 0 rgba(230,181,102,0)' }, { boxShadow: '0 0 0 6px rgba(230,181,102,.2)' }, { boxShadow: '0 0 0 0 rgba(230,181,102,0)' }], loop(3200))); } } },
+    { id: 'blur', name: 'Размытие под плашкой', meaning: 'можно ли делать плашки с размытым фоном', build(s) {
+      for (let i = 0; i < 10; i++) { const c = cardEl(s, 200); s.append(c); anims.push(c.animate([{ transform: 'translateX(0px)' }, { transform: 'translateX(40px)' }, { transform: 'translateX(0px)' }], loop(2000 + i * 100))); }
+      const glass = css(document.createElement('div'), 'position:absolute;left:50%;top:60px;width:600px;margin-left:-300px;height:140px;border-radius:24px;background:rgba(27,29,33,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line)');
+      s.append(glass); } },
+    { id: 'office', name: 'Экран офиса целиком, все эффекты сразу', meaning: 'худший случай без бюджета движения', build(s) {
+      SCENES[1].build(s); SCENES[2].build(s); SCENES[3].build(s);
+      for (let i = 0; i < 3; i++) { const c = cardEl(s, 300); s.append(c);
+        const svgNS = 'http://www.w3.org/2000/svg'; const sv = document.createElementNS(svgNS, 'svg'); sv.setAttribute('width', '260'); sv.setAttribute('height', '40'); sv.setAttribute('style', 'position:absolute;left:20px;top:50px');
+        const pl = document.createElementNS(svgNS, 'polyline'); let pts = ''; for (let k = 0; k < 30; k++) pts += (k * 9) + ',' + (20 + Math.sin(k / 3) * 14) + ' ';
+        pl.setAttribute('points', pts); pl.setAttribute('fill', 'none'); pl.setAttribute('stroke', 'currentColor'); pl.setAttribute('stroke-width', '2'); sv.append(pl); c.append(sv);
+        const dot = css(document.createElement('div'), 'position:absolute;left:274px;top:62px;width:8px;height:8px;border-radius:4px;background:var(--accent-text)'); c.append(dot);
+        anims.push(dot.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.5)' }, { transform: 'scale(1)' }], loop(2400))); } } },
+    { id: 'scroll', name: 'Прокрутка длинного списка', meaning: 'список регионов, уведомлений, приложений', build(s) {
+      s.setAttribute('style', 'position:absolute;inset:0;overflow-y:auto;padding:48px 16px 16px;box-sizing:border-box');
+      for (let i = 0; i < 80; i++) { const r = css(document.createElement('div'), 'height:72px;margin-bottom:6px;border-radius:16px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;padding:0 16px;font-size:18px'); r.textContent = 'Строка списка ' + (i + 1); s.append(r); }
+      let dir = 1; const tick = () => { if (!s.isConnected) return; s.scrollTop += 9 * dir; if (s.scrollTop + s.clientHeight >= s.scrollHeight - 2) dir = -1; if (s.scrollTop <= 0) dir = 1; requestAnimationFrame(tick); }; requestAnimationFrame(tick); } }
+  ];
+
+  function verdict(fps, slowPct, nominalFps) {
+    const ratio = fps / nominalFps;
+    if (ratio >= 0.9 && slowPct <= 5) return ['ok', 'Плавно'];
+    if (ratio >= 0.65 && slowPct <= 20) return ['warn', 'Терпимо'];
+    return ['crit', 'Тормозит'];
+  }
+  function row(name, fpsText, slowText, v, meaning) {
+    const tr = document.createElement('tr');
+    const cells = [name, fpsText, slowText, null, meaning];
+    cells.forEach((c, i) => { const td = document.createElement('td'); if (i === 1 || i === 2) td.className = 'num';
+      if (i === 3) { const ch = document.createElement('span'); ch.className = 'chip ' + v[0]; ch.textContent = v[1]; td.append(ch); } else td.textContent = c; tr.append(td); });
+    rows.append(tr);
+  }
+
+  // ---------- CPU: the kind of work the launcher does (parse the aggregator JSON, format numbers) ----------
+  function cpuTest() {
+    const payload = { ts: Date.now(), starlink: { down: 182.4, up: 21.3, ping: 38, history: Array.from({ length: 120 }, (_, i) => 150 + Math.sin(i) * 30) },
+      ecoflow: { soc: 76, inW: 210, outW: 96, history: Array.from({ length: 360 }, (_, i) => 60 + i % 30) },
+      alerts: Array.from({ length: 27 }, (_, i) => ({ id: 'UA' + i, state: i % 5 ? 'none' : 'air', since: Date.now() - i * 60000 })),
+      grafana: Array.from({ length: 6 }, (_, i) => ({ name: 'm' + i, series: Array.from({ length: 60 }, (_, k) => Math.random()) })),
+      calendar: Array.from({ length: 12 }, (_, i) => ({ title: 'Встреча ' + i, start: Date.now() + i * 3600000 })) };
+    const text = JSON.stringify(payload);
+    let t0 = performance.now(); for (let i = 0; i < 300; i++) JSON.parse(text); const parseMs = (performance.now() - t0) / 300;
+    t0 = performance.now(); let x = 0; for (let i = 0; i < 3e6; i++) x += Math.sqrt(i) * Math.sin(i); const loopMs = performance.now() - t0;
+    return { payloadKb: Math.round(text.length / 1024), parseMs: Math.round(parseMs * 100) / 100, loopMs: Math.round(loopMs), sink: x > 0 };
+  }
+
+  async function runAll() {
+    $('run').disabled = true; $('copy').disabled = true; rows.textContent = ''; results.tests = [];
+    const total = SCENES.length + 1; let done = 0; const step = () => { done++; $('bar').style.width = Math.round(done / total * 100) + '%'; };
+    // nominal refresh from the idle scene
+    clear(); $('stageLabel').textContent = SCENES[0].name;
+    await wait(400); const idle = await measure(3000);
+    const ints = []; for (let i = 1; i < idle.length; i++) ints.push(idle[i] - idle[i - 1]); ints.sort((a, b) => a - b);
+    const nominal = ints[Math.floor(ints.length / 2)] || 16.7; const nominalFps = Math.round(1000 / nominal);
+    results.refreshHz = nominalFps;
+    const idleStats = stats(idle, nominal); results.tests.push({ id: 'idle', ...idleStats });
+    row(SCENES[0].name, idleStats.fps + ' из ' + nominalFps, idleStats.slowPct + '%', verdict(idleStats.fps, idleStats.slowPct, nominalFps), 'частота экрана: ' + nominalFps + ' Гц'); step();
+    for (const sc of SCENES.slice(1)) {
+      clear(); $('stageLabel').textContent = sc.name; sc.build(scene());
+      await wait(600); const t = await measure(5000); const st = stats(t, nominal); const v = verdict(st.fps, st.slowPct, nominalFps);
+      results.tests.push({ id: sc.id, ...st, verdict: v[1] }); row(sc.name, st.fps + ' из ' + nominalFps, st.slowPct + '%', v, sc.meaning); step();
+    }
+    clear(); $('stageLabel').textContent = 'Расчёты процессора';
+    await wait(200); const cpu = cpuTest(); results.cpu = cpu;
+    const cv = cpu.parseMs <= 2 && cpu.loopMs <= 400 ? ['ok', 'Быстро'] : (cpu.parseMs <= 6 && cpu.loopMs <= 1200 ? ['warn', 'Средне'] : ['crit', 'Медленно']);
+    row('Разбор данных сервера (' + cpu.payloadKb + ' КБ) и расчёты', cpu.parseMs + ' мс', cpu.loopMs + ' мс', cv, 'обновление виджетов раз в 2–30 с'); step();
+    $('stageLabel').textContent = 'Готово';
+    recommend(); $('run').disabled = false; $('copy').disabled = false;
+    const dump = $('dump'); dump.hidden = false; dump.value = JSON.stringify(results, null, 1);
+  }
+
+  function recommend() {
+    const by = Object.fromEntries(results.tests.map((t) => [t.id, t]));
+    const good = (id) => by[id] && by[id].verdict === 'Плавно';
+    const bad = (id) => by[id] && by[id].verdict === 'Тормозит';
+    const recs = [];
+    if (results.refreshHz < 55) recs.push('Экран обновляется ' + results.refreshHz + ' раз в секунду. Анимации делаем короче и проще, плавности «как на телефоне» не будет.');
+    recs.push(good('breathe') ? 'Дыхание и пульс статусов можно оставить.' : (bad('breathe') ? 'Даже дыхание точек тормозит: оставляем только одноразовые анимации и выключаем повторяющиеся.' : 'Дыхание оставляем, но только на одном-двух элементах экрана.'));
+    recs.push(good('sweep') ? 'Бегущий свет на шкалах можно оставить.' : 'Бегущий свет заменяем статичной шкалой со стрелкой направления: свечение с размытием дорогое.');
+    recs.push(good('rings') ? 'Кольца внимания можно оставить.' : 'Кольца внимания заменяем статичной цветной рамкой.');
+    recs.push(good('blur') ? 'Размытие под плашками допустимо, но в макетах его и так нет.' : 'Размытие не используем: плашки только на сплошном фоне (как в макетах).');
+    recs.push(good('office') ? 'Даже все эффекты разом идут плавно: бюджет движения — для спокойствия, а не из-за железа.' : 'Бюджет движения обязателен: не больше двух видов анимации на экране одновременно.');
+    recs.push(good('scroll') ? 'Прокрутка списков плавная.' : 'Списки делаем короче и без теней у строк, прокрутку проверяем отдельно в лаунчере.');
+    if (results.device.memoryGb && results.device.memoryGb < 4) recs.push('Браузер видит меньше 4 ГБ памяти: держим лаунчер лёгким и не храним историю графиков дольше часа.');
+    const ul = $('recs'); ul.textContent = ''; recs.forEach((r) => { const li = document.createElement('li'); li.textContent = r; ul.append(li); });
+    results.recommendations = recs;
+  }
+
+  $('run').addEventListener('click', () => { runAll().catch((e) => { $('stageLabel').textContent = 'Ошибка: ' + e.message; $('run').disabled = false; }); });
+  $('copy').addEventListener('click', async () => {
+    const text = JSON.stringify(results, null, 1);
+    try { await navigator.clipboard.writeText(text); $('copy').textContent = 'Скопировано'; }
+    catch (e) { const d = $('dump'); d.hidden = false; d.value = text; d.focus(); d.select(); $('copy').textContent = 'Выделено ниже'; }
+  });
+})();
+</script>
+</body>
+</html>
