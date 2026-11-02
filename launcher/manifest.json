@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "channel": "launcher",
+  "published_at": "2026-11-02T12:50:27Z",
+  "commit": "4ef726a6f816043f90616e5619bef9fa011c4b28",
+  "ui": {
+    "version": 67,
+    "path": "ui/ui-38962827814e.zip",
+    "sha256": "38962827814e35e4661e7b77c1c426ab060ea03253e70057d2fc811e9cb8d743",
+    "bytes": 216012,
+    "min_shell": 1
+  },
+  "apk": {
+    "version_code": 1,
+    "version_name": "0.1.0",
+    "path": "apk/hu-1.apk",
+    "sha256": "e128bd82f9e37691a4a3c6acbfd34fe4b357f9fa59c96234956f8fe999996f3c",
+    "bytes": 2541115
+  }
+}
