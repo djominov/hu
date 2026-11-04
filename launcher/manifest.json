@@ -1,13 +1,13 @@
 {
   "schema": 1,
   "channel": "launcher",
-  "published_at": "2026-11-04T15:46:53Z",
-  "commit": "f089d2afee47915ebbd4d11d74c2ea0a20a9a9cb",
+  "published_at": "2026-11-04T16:13:05Z",
+  "commit": "4cec11d13e5ab5037a18d5f5f9cd18f5dcefde20",
   "ui": {
-    "version": 305,
-    "path": "ui/ui-6a288373dafa.zip",
-    "sha256": "6a288373dafa5ca470bc297898ae92757f6098ee014780bb7b8c1f798b94f15d",
-    "bytes": 343879,
+    "version": 313,
+    "path": "ui/ui-d129996780a9.zip",
+    "sha256": "d129996780a9f1b82413ed72fa2bf9772481f7310bcdec569a64afc1e7e4f8a2",
+    "bytes": 345404,
     "min_shell": 1
   },
   "apk": {
