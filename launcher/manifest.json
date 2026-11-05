@@ -1,12 +1,12 @@
 {
   "schema": 1,
   "channel": "launcher",
-  "published_at": "2026-11-04T18:15:05Z",
-  "commit": "ac12fa5384691c1ce54c5233b3197e80d5b49d0e",
+  "published_at": "2026-11-05T10:16:41Z",
+  "commit": "bedb5d1b669c4584a48fa7fdbbf1498b329f36f9",
   "ui": {
-    "version": 339,
-    "path": "ui/ui-9980df415722.zip",
-    "sha256": "9980df415722c53bff3275dfd2762b3d3a1c6e9950b7be32364f0c132674f982",
+    "version": 346,
+    "path": "ui/ui-644a1c727fc4.zip",
+    "sha256": "644a1c727fc456b7f3bab887e840eb99e8777382acd7589343db1ca4d6abd562",
     "bytes": 347128,
     "min_shell": 1
   },
