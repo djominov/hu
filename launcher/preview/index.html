@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HU Launcher</title>
+    <script type="module" crossorigin src="./assets/index-Ck6O9UdY.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DPMXFD3K.css">
+  </head>
+  <body>
+    <!--
+      The boot splash: RoadDesk's logo, the step under way, the version (context/specs/home-flows.md,
+      section 0.2; board 45's mark, words and colours). Static, so the WebView paints it before the
+      script bundle runs. React's first render replaces it. Its styles are
+      src/screens/splash/splash.css, in the stylesheet the build links above.
+    -->
+    <div id="root">
+      <div class="splash">
+        <div class="splash__logo">
+          <svg class="splash__mark" width="180" height="180" viewBox="0 0 120 120" aria-hidden="true">
+            <rect x="4" y="4" width="112" height="112" rx="32" fill="#1B2A44" />
+            <path d="M30 74h60l-7-20a8 8 0 0 0-7.5-5.5h-31A8 8 0 0 0 37 54z" fill="none" stroke="#96BBF2" stroke-width="5" stroke-linejoin="round" />
+            <circle cx="42" cy="80" r="6" fill="#96BBF2" />
+            <circle cx="78" cy="80" r="6" fill="#96BBF2" />
+            <path d="M48 36a17 17 0 0 1 24 0" fill="none" stroke="#8FD6CA" stroke-width="5" stroke-linecap="round" />
+            <path d="M54 42a8 8 0 0 1 12 0" fill="none" stroke="#8FD6CA" stroke-width="5" stroke-linecap="round" />
+          </svg>
+          <span class="splash__name">RoadDesk</span>
+        </div>
+        <div class="splash__loading" role="status">
+          <span data-splash-step></span>
+          <span class="splash__dots" aria-hidden="true"><span></span><span></span><span></span></span>
+        </div>
+        <span class="splash__version" data-splash-version></span>
+      </div>
+    </div>
+    <script>
+      // Board 21's «Анимации» off: the document's mark, before the bundle, so the splash's dots stand
+      // still from the first paint (context/specs/home-flows.md, section 5.1). The setting is the one
+      // the shell keeps (HuShell.stateGet); the system's reduced-motion preference is not asked (W8:
+      // the head unit's WebView reports it by itself). While the shell says the car is driving, the
+      // document's data-driving stops the dots too, as the bundle's own does. src/motion/reducedMotion.ts
+      // and App.tsx keep both marks current once the bundle runs.
+      (function () {
+        var shell = window.HuShell;
+        try {
+          if (shell && typeof shell.stateGet === 'function') {
+            var kept = JSON.parse(shell.stateGet('settings') || 'null');
+            if (kept && kept.animations === false) document.documentElement.setAttribute('data-reduced-motion', '');
+          }
+        } catch (e) {
+          // a broken kept value or bridge: «Анимации» as by default, on
+        }
+        try {
+          if (shell && typeof shell.driving === 'function') {
+            var motion = JSON.parse(shell.driving() || 'null');
+            if (motion && motion.state === 'driving') document.documentElement.setAttribute('data-driving', '');
+          }
+        } catch (e) {
+          // no word on driving: parked, as the bundle reads it
+        }
+      })();
+    </script>
+    <script>
+      // The splash's words, before the bundle: the build writes the steps' words and splash.version
+      // from src/i18n/{ru,uk,en}.json here (vite.config.ts), and the language is picked by
+      // resolveLocale's rule (?lang=, then the system language, then English). The version is the
+      // shell's versionName; without a shell (the desktop), ?version= stands in for it.
+      // The step under way: the shell calls window.huSplashStep('update' | 'server' | 'widgets')
+      // through WebView.evaluateJavascript as it goes; before its first call, and on the desktop
+      // without ?step=, it is 'widgets', board 45's «Загружаем виджеты». An unknown step is ignored.
+      (function () {
+        var strings = {"ru":{"version":"версия {version}","steps":{"update":"Проверяем обновления","server":"Подключаемся к серверу","widgets":"Загружаем виджеты"}},"uk":{"version":"версія {version}","steps":{"update":"Перевіряємо оновлення","server":"Під’єднуємося до сервера","widgets":"Завантажуємо віджети"}},"en":{"version":"version {version}","steps":{"update":"Checking for updates","server":"Connecting to the server","widgets":"Loading widgets"}}};
+        if (!strings) return;
+        var query = new URLSearchParams(window.location.search);
+        var pick = function (tag) {
+          var language = String(tag || '').trim().toLowerCase().split(/[-_]/)[0];
+          return Object.prototype.hasOwnProperty.call(strings, language) ? language : null;
+        };
+        // On the head unit the language the owner chose is kept by the shell (HuShell.stateGet, the
+        // settings' JSON); it comes before the system's, as in the app itself.
+        var kept = null;
+        try {
+          if (window.HuShell && typeof window.HuShell.stateGet === 'function') kept = JSON.parse(window.HuShell.stateGet('settings') || 'null');
+        } catch (e) {
+          kept = null;
+        }
+        var locale = pick(query.get('lang')) || pick(kept && kept.language) || pick(navigator.language) || 'en';
+        var version = null;
+        try {
+          if (window.HuShell) version = JSON.parse(window.HuShell.info()).versionName;
+        } catch (e) {
+          version = null;
+        }
+        if (!version) version = query.get('version');
+        document.documentElement.lang = locale;
+        var line = document.querySelector('[data-splash-step]');
+        window.huSplashStep = function (step) {
+          var words = strings[locale].steps[step];
+          if (typeof words === 'string' && line) line.textContent = words;
+        };
+        window.huSplashStep('widgets');
+        if (query.get('step')) window.huSplashStep(query.get('step'));
+        if (version) document.querySelector('[data-splash-version]').textContent = strings[locale].version.replace('{version}', version);
+      })();
+    </script>
+  </body>
+</html>
