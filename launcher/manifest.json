@@ -1,20 +1,20 @@
 {
   "schema": 1,
   "channel": "launcher",
-  "published_at": "2026-11-19T08:45:06Z",
-  "commit": "ec9bca703215ca6c2a765b987431035d9f5b1dbe",
+  "published_at": "2026-11-19T10:04:53Z",
+  "commit": "eb69a8637c8b315893e82f1d5e6a2a18856d4d9f",
   "ui": {
-    "version": 559,
-    "path": "ui/ui-ed292741614a.zip",
-    "sha256": "ed292741614a92135418af29acf195b0148be36f4bdbb0398f69f9706768d522",
-    "bytes": 412157,
+    "version": 570,
+    "path": "ui/ui-186a20dd2987.zip",
+    "sha256": "186a20dd298730d784680b0e5dab21cbef556724aecc90a3be79a3910b9148a4",
+    "bytes": 414202,
     "min_shell": 1
   },
   "apk": {
-    "version_code": 15,
-    "version_name": "0.8.7",
-    "path": "apk/hu-15.apk",
-    "sha256": "38e072a6d548b24ed2373d03d985904f70a7ddb6c9f53f0e74e1a6325222cbf3",
-    "bytes": 3237630
+    "version_code": 16,
+    "version_name": "0.8.8",
+    "path": "apk/hu-16.apk",
+    "sha256": "4805ab50571f5ec7440396b31edc31d95b88e7cdbf78144221825e2f921f9522",
+    "bytes": 3249918
   }
 }
